@@ -161,7 +161,7 @@ def analyzeFile(filepath):
             maxEmotion = "Afraid"
 
         emotionFile = open("emotions", 'a')
-        WriteEmotions(emotionFile, maxEmotion)
+        writeEmotions(emotionFile, maxEmotion)
         emotionFile.close()
 
         
