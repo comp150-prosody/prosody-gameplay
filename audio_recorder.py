@@ -2,6 +2,7 @@ from sys import byteorder
 from array import array
 from struct import pack
 
+
 import pyaudio
 import wave
 import sys
@@ -14,6 +15,7 @@ THRESHOLD = 500
 CHUNK_SIZE = 1024
 FORMAT = pyaudio.paInt16
 RATE = 44100
+lineNum = 0
 
 def is_silent(snd_data):
     "Returns 'True' if below the 'silent' threshold"
@@ -148,9 +150,8 @@ def analyzeFile(filepath):
                 emotionProbabilities.anger,
                 emotionProbabilities.fear]
 
-        if max(emotions) == emotionProbabilities.neutrality:
-            maxEmotion = "Neutral"
-        elif max(emotions) == emotionProbabilities.happiness:
+       
+        if max(emotions) == emotionProbabilities.happiness:
             maxEmotion = "Happy"
         elif max(emotions) == emotionProbabilities.sadness:
             maxEmotion = "Sad"
@@ -159,9 +160,19 @@ def analyzeFile(filepath):
         elif max(emotions) == emotionProbabilities.fear:
             maxEmotion = "Afraid"
 
-        sendToFile(emotions)
+        emotionFile = open("emotions", 'a')
+        WriteToFile(emotionFile, maxEmotion)
+        emotionFile.close()
+
+        
     else:
         print ("Not enough sonorancy to determine emotions")
+
+
+def writeEmotions(emotionFile, emotion):
+    output = str(lineNum) + " " + emotion + "\n"
+    emotionFile.write(output)
+    lineNum += 1
 
 
 def run():
@@ -174,3 +185,5 @@ def run():
 
 if __name__ == '__main__':
     run()
+
+
