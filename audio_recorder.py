@@ -15,7 +15,6 @@ THRESHOLD = 500
 CHUNK_SIZE = 1024
 FORMAT = pyaudio.paInt16
 RATE = 44100
-lineNum = 0
 
 def is_silent(snd_data):
     "Returns 'True' if below the 'silent' threshold"
@@ -121,12 +120,13 @@ def record_to_file(path):
     wf.writeframes(data)
     wf.close()
 
-def analyzeFile(filepath):
+def analyzeFile(filepath, lineNum):
+    print("in analyzeFile 1")
     Vokaturi.load("./lib/Vokaturi_mac.so")
 
-    file_name = sys.argv[1]
-    (sample_rate, samples) = scipy.io.wavfile.read(file_name)
+    (sample_rate, samples) = scipy.io.wavfile.read(filepath)
 
+    print("in analyzeFile 2")
     buffer_length = len(samples)
     c_buffer = Vokaturi.SampleArrayC(buffer_length)
     if samples.ndim == 1:  # mono
@@ -135,52 +135,64 @@ def analyzeFile(filepath):
             c_buffer[:] = 0.5*(samples[:,0]+0.0+samples[:,1]) / 32768.0
 
     voice = Vokaturi.Voice (sample_rate, buffer_length)
+    print("in analyzeFile 3")
 
     voice.fill(buffer_length, c_buffer)
 
     quality = Vokaturi.Quality()
     emotionProbabilities = Vokaturi.EmotionProbabilities()
     voice.extract(quality, emotionProbabilities)
+    print("in analyzeFile 4")
 
 
     if quality.valid:
-        emotions = [emotionProbabilities.neutrality,
+        emotions = [
                 emotionProbabilities.happiness,
                 emotionProbabilities.sadness,
                 emotionProbabilities.anger,
-                emotionProbabilities.fear]
+                emotionProbabilities.fear,
+                emotionProbabilities.neutrality]
 
-       
+
         if max(emotions) == emotionProbabilities.happiness:
             maxEmotion = "Happy"
         elif max(emotions) == emotionProbabilities.sadness:
             maxEmotion = "Sad"
         elif max(emotions) == emotionProbabilities.anger:
             maxEmotion = "Angry"
-        elif max(emotions) == emotionProbabilities.fear:
+        elif max(emotions) == emotionProbabilities.neutrality:
+            maxEmotion = "Neut"
+        else:
             maxEmotion = "Afraid"
 
-        emotionFile = open("emotions", 'a')
-        writeEmotions(emotionFile, maxEmotion)
-        emotionFile.close()
+        stats = ("Happy: %.3f\tSad: %.3f\tAngry %.3f\tFear %.3f\tNeut %.3f" % (emotions[0], emotions[1], emotions[2], emotions[3], emotions[4]))
 
-        
+        print("in analyzeFile 5")
+        emotionFile = open("emotions", 'a')
+        print("in analyzeFile 6")
+        writeEmotions(emotionFile, maxEmotion + " " + stats, lineNum)
+        print("in analyzeFile 7")
+        emotionFile.close()
+        print("in analyzeFile 8")
+
+
     else:
         print ("Not enough sonorancy to determine emotions")
 
 
-def writeEmotions(emotionFile, emotion):
+def writeEmotions(emotionFile, emotion, lineNum):
     output = str(lineNum) + " " + emotion + "\n"
     emotionFile.write(output)
-    lineNum += 1
 
 
 def run():
+    lineNum = 0
     while 1:
         print("please speak into the microphone")
         record_to_file('demo.wav')
-        analyzeFile('demo.wav')
+        analyzeFile('demo.wav', lineNum)
         print("file recorded")
+        lineNum += 1
 
 
 if __name__ == '__main__':
