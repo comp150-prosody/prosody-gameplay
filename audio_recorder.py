@@ -150,7 +150,8 @@ def analyzeFile(filepath, lineNum):
                 emotionProbabilities.happiness,
                 emotionProbabilities.sadness,
                 emotionProbabilities.anger,
-                emotionProbabilities.fear]
+                emotionProbabilities.fear,
+                emotionProbabilities.neutrality]
 
 
         if max(emotions) == emotionProbabilities.happiness:
@@ -159,13 +160,17 @@ def analyzeFile(filepath, lineNum):
             maxEmotion = "Sad"
         elif max(emotions) == emotionProbabilities.anger:
             maxEmotion = "Angry"
+        elif max(emotions) == emotionProbabilities.neutrality:
+            maxEmotion = "Neut"
         else:
             maxEmotion = "Afraid"
+
+        stats = ("Happy: %.3f\tSad: %.3f\tAngry %.3f\tFear %.3f\tNeut %.3f" % (emotions[0], emotions[1], emotions[2], emotions[3], emotions[4]))
 
         print("in analyzeFile 5")
         emotionFile = open("emotions", 'a')
         print("in analyzeFile 6")
-        writeEmotions(emotionFile, maxEmotion, lineNum)
+        writeEmotions(emotionFile, maxEmotion + " " + stats, lineNum)
         print("in analyzeFile 7")
         emotionFile.close()
         print("in analyzeFile 8")
