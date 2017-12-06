@@ -13,7 +13,7 @@ public class EmotionReader{
 		current_lineNum = -1;
 	}
 
-	public static String readNextEmotion(int lineNum){
+	public static String readNextEmotion(){
 		
 		File file = new File("emotions");
 		String lastLine = tail(file);
